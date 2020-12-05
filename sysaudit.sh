@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 
 
+
 # System Info
 echo "OS: "$(cat /etc/os-release | egrep '^NAME=' | cut -d '"' -f 2) $(cat /etc/os-release | egrep '^VERSION=' | cut -d '"' -f 2)
 echo "Kernel Version: "$(uname -a | cut -d " " -f 3)
@@ -15,24 +16,19 @@ echo "Total RAM:" $(free -mh | grep Mem | awk -F " " '{ print $2 }'), "Used RAM:
 
 
 # Network Bandwidth Info
-#pkgs='nethogs'
-#if ! rpm -qa | grep $pkgs; 
-#then
-#	sudo yum -y install $pkgs
-#else
-#	"The package is already installed!"
-#fi
-#echo $(sudo nethogs)
+pkgs='iftop'
+
+check=$(rpm -q pkgs &>/dev/null && echo "Installed" || echo "Not Installed")
+if [[ check == "Not Installed" ]]
+then
+	sudo yum -y install $pkgs
+else
+	echo "The package is already installed!"
+fi
 
 total_network_bandwidth=$(sudo iftop -t -s 1 -n -N 2>/dev/null | awk '/send and receive/ {print $8}')
-echo $total_network_bandwidth > reports.txt
 
-python3 - << EOF
-
-file = open('reports.txt')
-print(file.readline())
-
-EOF
+echo "Network bandwidth": $total_network_bandwidth > reports.txt
 
 #echo $(sudo iftop -t -s 1 -n -N 2>/dev/null | awk '/send and receive/ {gsub(/[^0-9]?b$/,"",$8) ; print $8}')
 
