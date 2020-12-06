@@ -37,8 +37,9 @@ if [ "$EUID" -ne 0 ]
 	clear
 
 	echo -e "\e[1;42m Downloading Required Packages. Please wait... \e[0m"
-	sudo yum install --enablerepo="epel" ufw -y
-	echo "y" | sudo ufw enable
+	sudo yum install --enablerepo="epel" ufw -y  # install ufw
+	echo "y" | sudo ufw enable 		     # enable ufw
+	sudo yum -y install iftop  		     # iftop
 	clear
 
 	#echo "###Auditing Hardware###"
@@ -65,16 +66,6 @@ if [ "$EUID" -ne 0 ]
 	# Network Bandwidth Info
 	echo -e "\e[1;31m###Network Bandwidth Info### \e[0m" 
 	nohup ping google.com -c 4 2>1& 
-	pkgs='iftop'
-
-	check=$(rpm -q pkgs &>/dev/null && echo "Installed" || echo "Not Installed")
-	if [[ check == "Not Installed" ]]
-	then
-		echo "This package isn't installed. Please wait a few seconds..."
-		sudo yum -y install $pkgs
-	#else
-		#echo "The package is already installed!"
-	fi
 
 	total_network_bandwidth=$(sudo iftop -t -s 1 -n -N 2>/dev/null | awk '/send and receive/ {print $8}')
 
@@ -96,5 +87,6 @@ if [ "$EUID" -ne 0 ]
 	echo -e "\e[1;31m###Disk Info### \e[0m" 
 
 	lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT
+	echo -e "\e[1;42m System audit successfully completed. \e[0m"
 fi
 
