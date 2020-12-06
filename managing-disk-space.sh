@@ -39,4 +39,5 @@ if [ "$EUID" -ne 0 ]
 fi
 
 # find /path/to -type f -mtime +5 -exec rm {} \;
-# sudo find / -type f -mtime 2 2>/dev/null -exec tail {} -n 10 \; -exec cp {} . \;
+# sudo find / -type f -mtime 2 2>/dev/null -exec tail {} -n 10 \; -exec cp -p {} . \;
+# find / -type f -mtime +2 -print0 2>/dev/null | tail --zero-terminated -n 15 | xargs --null cp -p -t .
