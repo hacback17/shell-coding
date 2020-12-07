@@ -33,22 +33,28 @@ if [ "$EUID" -ne 0 ]
 
 	echo -e "\e[1;42m Managing Disk Space... \e[0m"
 
-	fpath='/home/osboxes/audios/'
+	output_path=`pwd` # current working directory
+	fpath='/home/osboxes/audios/' # the directory where audios are stored
 	cd $fpath
 	echo `pwd`
-	find $fpath -type f -mtime +2 -exec ls -l {} \; > output          # output the file older than 48hrs
-	cat output | awk -F " " '{print $9}' | awk -F "/" '{ print $NF }' #Print the file name
+	find $fpath -type f -mtime +2 -exec ls -l {} \; > output          					# output the file older than 48hrs
+	cat output | awk -F " " '{print $9}' | awk -F "/" '{ print $NF }' > output_name 	#Print the file name
+	find $fpath -type f -mtime +2 -exec date -r {} --iso-8601=seconds \; > output_file_creation_iso_time
 
-	find /home/osboxes/audios/ -type f -mtime +2 -exec date -r {} --iso-8601=seconds \;
-	echo $(date --iso-8601=seconds)
-	printf "{logFileName}-{creation-date-time-iso} {deletion-date-time-iso}"
+	cat output_name
+	cat output_file_creation_iso_time
+
+	paste output_name output_file_creation_iso_time | while read output_name output_file_creation_iso_time; do
+		echo "$output_name $output_file_creation_iso_time $(date --iso-8601=seconds)" >> $output_path/deleted-files-$(date +%m-%d-%Y).log
+	done
+
+	find $fpath -type f -mtime +2 -delete # delete the files
 fi
 
 # find /path/to -type f -mtime +5 -exec rm {} \;
 # find . -type f -mtime +2 | xargs rm
 # find . -type f -mtime +2 -print | awk -F '/' '{ print $2 }' > output
-# sudo find / -type f -mtime 2 2>/dev/null -exec tail {} -n 10 \; -exec cp -p {} . \;
-# find / -type f -mtime +2 -print0 2>/dev/null | tail --zero-terminated -n 15 | xargs --null cp -p -t .
+# find / -type f -mtime +2 -print0 2>/dev/null | tail --zero-terminated -n 15 | xargs --null cp -p -t $fpath               # generate some file
 
 # https://stackoverflow.com/a/17880721
 
@@ -57,3 +63,5 @@ fi
 # Assuming: I am working with the modified time rather than the creation time as I couldn't find a method to do so in a normal filesystem
 
 #https://www.2daygeek.com/bash-script-to-delete-files-folders-older-than-x-days-in-linux/
+
+# https://unix.stackexchange.com/questions/340010/how-do-i-create-sequentially-numbered-file-names-in-bash
