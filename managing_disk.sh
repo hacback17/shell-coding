@@ -33,13 +33,27 @@ if [ "$EUID" -ne 0 ]
 
 	echo -e "\e[1;42m Managing Disk Space... \e[0m"
 
-	cd /home/osboxes/audios/
+	fpath='/home/osboxes/audios/'
+	cd $fpath
 	echo `pwd`
-	ls -la
+	find $fpath -type f -mtime +2 -exec ls -l {} \; > output          # output the file older than 48hrs
+	cat output | awk -F " " '{print $9}' | awk -F "/" '{ print $NF }' #Print the file name
+
+	find /home/osboxes/audios/ -type f -mtime +2 -exec date -r {} --iso-8601=seconds \;
+	echo $(date --iso-8601=seconds)
+	printf "{logFileName}-{creation-date-time-iso} {deletion-date-time-iso}"
 fi
 
 # find /path/to -type f -mtime +5 -exec rm {} \;
+# find . -type f -mtime +2 | xargs rm
+# find . -type f -mtime +2 -print | awk -F '/' '{ print $2 }' > output
 # sudo find / -type f -mtime 2 2>/dev/null -exec tail {} -n 10 \; -exec cp -p {} . \;
 # find / -type f -mtime +2 -print0 2>/dev/null | tail --zero-terminated -n 15 | xargs --null cp -p -t .
 
+# https://stackoverflow.com/a/17880721
+
 # https://dev.to/allericksha/script-to-clean-out-files-in-dir-and-have-a-note-of-deleted-files-in-deletedfiles-log-2741
+
+# Assuming: I am working with the modified time rather than the creation time as I couldn't find a method to do so in a normal filesystem
+
+#https://www.2daygeek.com/bash-script-to-delete-files-folders-older-than-x-days-in-linux/
